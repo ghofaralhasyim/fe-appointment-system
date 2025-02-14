@@ -51,6 +51,30 @@ export const validateField = debounce(
     300 
 );
 
+export const formatDate = (dateString: string | Date, format: string): string => {
+  const date = new Date(dateString);
+
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const day = date.getDate();
+  const dayOfWeek = date.getDay();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+
+  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const months = [
+      'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+      'September', 'October', 'November', 'December'
+  ];
+
+  if (format == 'DddMyyy') {
+    return `${daysOfWeek[dayOfWeek].substring(0, 3)} ${String(day).padStart(2, '0')} ${months[month].substring(0, 3)} ${year}`;
+  }
+  
+
+  return '';
+};
+
 export const getErrorFetchMessage = (error:any) : string  => {
     if (error.response) {
       return error.response._data.message;
@@ -78,20 +102,54 @@ export const addDays = (date: Date, days: number): Date => {
 };
 
 export const getParticipantColor = (name: string): string => {
-    const colorClasses = [
-      'bg-blue-500',
-      'bg-green-500',
-      'bg-purple-500',
-      'bg-pink-500',
-      'bg-indigo-500',
-      'bg-red-500',
-      'bg-yellow-500',
-      'bg-teal-500'
-    ];
+  const colorClasses = [
+    'bg-blue-500',
+    'bg-green-500',
+    'bg-purple-500',
+    'bg-pink-500',
+    'bg-indigo-500',
+    'bg-red-500',
+    'bg-yellow-500',
+    'bg-teal-500'
+  ];
+  
+  const hash = name.split('').reduce((acc, char) => {
+    return char.charCodeAt(0) + ((acc << 5) - acc);
+  }, 0);
     
-    const hash = name.split('').reduce((acc, char) => {
-      return char.charCodeAt(0) + ((acc << 5) - acc);
-    }, 0);
-    
-    return colorClasses[Math.abs(hash) % colorClasses.length];
-  };
+  return colorClasses[Math.abs(hash) % colorClasses.length];
+};
+
+export function IsWithinBusinessHours(startTime: string, endTime: string, userTimezone: string): boolean {
+  const startUTC = new Date(startTime);
+    const endUTC = new Date(endTime);
+
+    function getTimeParts(date: Date, timeZone: string) {
+        const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone,
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        }).formatToParts(date);
+
+        return {
+            hour: parseInt(parts.find(part => part.type === 'hour')?.value || '0', 10),
+            minute: parseInt(parts.find(part => part.type === 'minute')?.value || '0', 10),
+        };
+    }
+
+    const startLocal = getTimeParts(startUTC, userTimezone);
+    const endLocal = getTimeParts(endUTC, userTimezone);
+
+    const businessStart = { hour: 8, minute: 0 };
+    const businessEnd = { hour: 17, minute: 0 };
+
+    function isWithinHours(time: { hour: number; minute: number }) {
+        return (
+            (time.hour > businessStart.hour || (time.hour === businessStart.hour && time.minute >= businessStart.minute)) &&
+            (time.hour < businessEnd.hour || (time.hour === businessEnd.hour && time.minute <= businessEnd.minute))
+        );
+    }
+
+    return isWithinHours(startLocal) && isWithinHours(endLocal);
+}
