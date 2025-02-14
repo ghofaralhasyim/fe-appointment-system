@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-const isSidebarShow = ref<boolean>(false);
-
+import { onClickOutside } from "@vueuse/core";
 const authStore = useAuthStore();
 
 onMounted(() => {
@@ -16,9 +15,14 @@ function logout() {
   authStore.logout();
   router.replace("/");
 }
+
+const isSidebarShow = ref<boolean>(false);
+const sidebarRef = ref<HTMLElement>();
+onClickOutside(sidebarRef, (event) => (isSidebarShow.value = false));
 </script>
 
 <template>
+  <Toast />
   <header
     class="md:hidden fixed top-0 inset-x-0 bg-white h-14 flex px-3 items-center justify-between z-50"
   >
@@ -28,6 +32,7 @@ function logout() {
   </header>
   <div class="bg-indigo-50">
     <aside
+      ref="sidebarRef"
       class="bg-white fixed left-0 top-0 h-full rounded-sm shadow-sm shadow-indigo-100 z-50 translate-0 transition-all duration-200 ease-in-out md:translate-0"
       :class="{ '-translate-x-full': !isSidebarShow }"
     >
@@ -37,6 +42,7 @@ function logout() {
             to="/create-appointment"
             class="w-full py-1 md:py-2 px-2 rounded h-fit border border-white hover:bg-indigo-100 hover:border-indigo-300 hover:text-indigo-500 flex items-center gap-2"
             exact-active-class="bg-indigo-100 border-indigo-500 text-indigo-500"
+            @click="isSidebarShow = false"
           >
             <Icon name="mynaui:plus-square" />
             <span class="md:hidden">Create Appointment</span>
@@ -47,6 +53,7 @@ function logout() {
             to="/appointments"
             class="w-full py-1 md:py-2 px-2 rounded h-fit border border-white hover:bg-indigo-100 hover:border-indigo-300 hover:text-indigo-500 flex items-center gap-2"
             exact-active-class="bg-indigo-100 border-indigo-500 text-indigo-500"
+            @click="isSidebarShow = false"
           >
             <Icon name="mynaui:calendar" />
             <span class="md:hidden">Appointment</span>

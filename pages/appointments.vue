@@ -20,18 +20,27 @@ const {
   method: "GET",
 });
 
-const startDate = new Date("2025-02-14 08:00:00");
+const startDate = new Date(Date.now());
+const authStore = useAuthStore();
 </script>
 
 <template>
+  <section class="relative w-full mb-4">
+    <TimezoneSelector />
+  </section>
   <section class="relative w-full bg-white p-4 rounded-lg">
     <h2 class="font-medium">Appointments</h2>
 
     <Schedules
-      v-if="!pending && dataAppointments?.data?.length"
+      v-if="dataAppointments?.data?.length"
       :appointments="dataAppointments.data"
-      timezone="Asia/Jakarta"
+      :timezone="authStore.user?.timezone || 'Asia/Jakarta'"
       :start-date="startDate"
     />
+  </section>
+
+  <section class="relative w-full lg:w-1/2 bg-white p-4 rounded-lg mt-4">
+    <h2 class="font-medium">Invitations</h2>
+    <Invitations @updated="refreshAppointments" />
   </section>
 </template>

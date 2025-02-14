@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { z, ZodError } from "zod";
+import type { AuthToken, User } from "~/types/types";
 import { validateField, getErrorFetchMessage } from "~/utils/helpers";
 
 definePageMeta({

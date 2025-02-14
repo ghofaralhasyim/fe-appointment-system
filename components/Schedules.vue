@@ -52,6 +52,8 @@ onMounted(() => {
   updateWidth();
   window.addEventListener("resize", updateWidth);
 });
+
+const authStore = useAuthStore();
 </script>
 
 <template>
@@ -74,8 +76,13 @@ onMounted(() => {
             :key="appointment.appointment_id"
             class="rounded-lg border border-black/10 p-3"
           >
-            <li class="flex justify-between items-start">
+            <li class="flex justify-between items-start relative">
               <div>
+                <span
+                  v-if="appointment.host_id == authStore.user?.user_id"
+                  class="bg-indigo-500 text-xs px-1 absolute top-1 right-1 text-white rounded"
+                  >Host</span
+                >
                 <h4 class="font-medium">
                   {{ appointment.title }}
                 </h4>
@@ -85,6 +92,12 @@ onMounted(() => {
                   {{ formatTimeToLocal(appointment.end_time, timezone) }}
                 </div>
                 <div class="mt-2 flex flex-wrap items-center text-sm">
+                  <span
+                    class="w-6 h-6 rounded-full flex items-center justify-center text-white not-first:-ml-2"
+                    :class="[getParticipantColor('host')]"
+                  >
+                    {{ appointment.host.name[0] }}
+                  </span>
                   <span
                     v-for="(participant, idx) in appointment.attendants"
                     :key="`part${idx}`"
@@ -103,10 +116,11 @@ onMounted(() => {
                   >
                   <p class="text-gray-500 text-xs ml-1">
                     <span>
+                      {{ appointment.host.name }},
                       {{
                         appointment.attendants
                           .map((item) => item.name)
-                          .join(",")
+                          .join(", ")
                       }}
                     </span>
                     <span v-if="appointment.total_attendants > 2"
