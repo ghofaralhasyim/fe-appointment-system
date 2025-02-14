@@ -16,6 +16,7 @@ export default defineNuxtConfig({
     'pinia-plugin-persistedstate/nuxt',
     '@nuxt/icon',
     '@samk-dev/nuxt-vcalendar',
+    '@vueuse/nuxt',
   ],
 
   vite: {
